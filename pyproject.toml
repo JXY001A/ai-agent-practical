@@ -1,0 +1,24 @@
+[project]
+name = "ai-agent-practical"
+version = "0.1.0"
+description = "《深入理解 AI Agent》配套实践：本地小模型 Agent 最小骨架"
+readme = "README.md"
+authors = [
+    { name = "JXY001A", email = "jxy001a@gmail.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    # 只需要这两个：ollama 是本地推理服务的客户端，requests 供天气工具调用
+    # Open-Meteo。骨架刻意不引入 torch / vllm —— macOS 无 CUDA，用不上。
+    "ollama>=0.5.1",
+    "requests>=2.31.0",
+]
+
+[project.scripts]
+ai-agent-practical = "ai_agent_practical:main"
+# 参考答案的入口。你自己实现的版本建议另起一个脚本名，例如 local-agent。
+reference-agent = "ai_agent_practical._reference_solution.main:main"
+
+[build-system]
+requires = ["uv_build>=0.12.15,<0.13.0"]
+build-backend = "uv_build"

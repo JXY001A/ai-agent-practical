@@ -1,0 +1,12 @@
+# 本地小模型 Agent 最小骨架的依赖（macOS / Ollama 路径）。
+#
+# 权威来源是 pyproject.toml —— uv 读那一个；本文件只是给不用 uv 的人
+# 做 pip 兜底。改依赖请优先改 pyproject.toml，避免两处不一致。
+#
+# 说明：原文件是从书上第 2 章实验整套复制的，包含 vllm / torch /
+# transformers / fastapi 等重型依赖。在 macOS（无 CUDA）上 torch 会装
+# 2GB+ 的 CPU 版，而本骨架的 Ollama 路径根本用不到，因此已精简为最小集。
+# 需要书上完整实验环境时，直接在那个仓库用 uv sync --extra ch2。
+
+ollama>=0.5.1
+requests>=2.31.0
