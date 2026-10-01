@@ -6,6 +6,8 @@ import requests
 # 模块解释：
 from  concurrent.futures import ThreadPoolExecutor
 
+from utils import printf_custom
+
 
 
 GRAY = "\033[90m"  # 终端灰色，用来区分思考与正文
@@ -141,6 +143,11 @@ def main()->None:
         ):
             message = chunk.get("message",{})
             if message.get("thinking"):
+                
+                # 灰色打印本 chunk 的思考增量片段（qwen3 的思维链会随流式逐段返回）：
+                # - GRAY / RESET：ANSI 颜色码（文件顶部定义），灰色用于与正文区分
+                # - end=""：取消 print 默认的换行，让所有片段在同一行连续拼接
+                # - flush=True：跳过缓冲立即写出，否则终端攒着不显示、失去“打字机”效果
                 print(f"{GRAY}{message.get('thinking')}{RESET}", end="",flush=True)
             if message.get("content"):
                 text_parts.append(message.get("content"))
@@ -161,6 +168,8 @@ def main()->None:
             messages.append(assistant)
             print(f"\n[最终回答] {assistant['content']}")
             print(f"[共 {step} 轮，最终上下文共 {len(messages)} 条消息]")
+            print("messages:\n")
+            printf_custom(messages)
             return
         
         assistant["tool_calls"] = pending
