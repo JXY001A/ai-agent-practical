@@ -3,8 +3,13 @@ import ollama
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import requests
+# 模块解释：
+from  concurrent.futures import ThreadPoolExecutor
 
 
+
+GRAY = "\033[90m"  # 终端灰色，用来区分思考与正文
+RESET = "\033[0m"
 
 MODEL = "qwen3:0.6b"
 MAX_STEPS = 8  # 防止无限循环
@@ -100,23 +105,78 @@ TOOLS = [
     }
 ]
 
-def run_tools(calls: list, messages: list[dict]) -> None:
-    """执行本轮的每个工具调用，并把结果追加进 messages。"""
-    for call in calls:
-        name = call['function']['name'] 
-        arguments = call['function']['arguments']
-        print(f"[执行] {name}({arguments})")
+def run_tools(calls: list) -> tuple[str, str]:
+    """执行一批工具调用，返回 [(工具明，结果),...]。
+    
+    同一批的调用可以并行执行；它们是模型在没有看到任何结果的情况下一次性生成的，
+    因此彼此独立。executor.map 保证返回顺序与请求一致，
+    如果后一个工具的参数依赖前一个的结果，模型只能等下一轮，那种情况不会出现在同一批里。
+    """
 
-        result = TOOL_FUNCTIONS[name](**arguments)
-        print(f"[结果] {result}")
-        messages.append({
-            "role": "tool",
-            "tool_name": name,
-            "content": result
-        })
+    def run_one(call:dict) -> tuple[str, str]:
+        name = call['function']['name']
+        arguments = call["function"]["arguments"]
+
+        return name, TOOL_FUNCTIONS[name](**arguments)
+    if len(calls)==1:
+        return [run_one(calls[0])]
+    # 并行执行，利用线程池
+    with ThreadPoolExecutor(max_workers=len(calls)) as pool:
+        return list(pool.map(run_one, calls))
 
 
 def main()->None:
+    client = ollama.Client()
+    messages:list[dict] = [{"role": "user", "content": "上海现在几点？气温多少？"}]
+    for step in range(1,MAX_STEPS+1):
+        text_parts:list[str] = []
+        pending:list = []
+        print(f"\n ---- 第 {step} 轮：ReAct 上下文已累计 {len(messages)} 条消息 ----")
+        for chunk in client.chat(
+            model=MODEL,
+            messages=messages,
+            tools=TOOLS,
+            stream=True,
+            think = True,
+        ):
+            message = chunk.get("message",{})
+            if message.get("thinking"):
+                print(f"{GRAY}{message.get('thinking')}{RESET}", end="",flush=True)
+            if message.get("content"):
+                text_parts.append(message.get("content"))
+                print(message.get("content"), end="", flush=True)
+            for call in message.get("tool_calls") or []:
+                # 去重
+                if call not in pending:
+                    pending.append(call)
+        
+        print()
+
+        assistant :dict = {
+            "role":"assistant",
+            "content": "".join(text_parts),
+        }
+
+        if not pending:
+            messages.append(assistant)
+            print(f"\n[最终回答] {assistant['content']}")
+            print(f"[共 {step} 轮，最终上下文共 {len(messages)} 条消息]")
+            return
+        
+        assistant["tool_calls"] = pending
+
+        for name, result  in run_tools(pending):
+            print(f"[工具 {name}] {result}")
+            messages.append({
+                "role":"tool",
+                "tool_name": name,
+                "content": result,
+            })
+        messages.append(assistant)
+    print(f"\n 达到最大轮数 {len(messages)}，提前结束可能模型陷入了重复调用")
+
+
+def main1()->None:
     # question = "上海现在几点？气温多少？"
     question = "现在东京的气温换算成华氏度是多少"
     print(f"提问：{question}\n")
@@ -150,41 +210,6 @@ def main()->None:
         run_tools(calls, messages)
 
     print(f"\n 达到最大轮数 {len(messages)}，提前结束可能模型陷入了重复调用")
-    # # # model_dump_json() 输出完整 JSON 结构（含所有字段），比直接 print 更直观
-    # print(f"返回的 response：\n{response.model_dump_json(indent=2, exclude_unset=True)}\n")
-    # # print(f"返回的 tool_calls：\n")
-
-    # messages.append({"role": "assistant", "content": message.get("content"),"tool_calls": calls})
-
-    # # if calls:
-    # #     # tool_calls 是 pydantic 对象列表，先用 model_dump() 转成 dict 再序列化
-    # #     print(json.dumps([c.model_dump() for c in calls], indent=4, ensure_ascii=False))
-    # # else:
-    # #     print("没有调用工具，直接回答：", message.get("content"))
-    # for call in calls:
-    #     name = call["function"]["name"]
-    #     arguments = call["function"]["arguments"]
-    #     print(f"[执行] {name}({arguments})")
-
-    #     result = TOOL_FUNCTIONS[name](**arguments)
-    #     print(f"[结果] {result}")
-    #     messages.append({
-    #         "role": "tool",
-    #         "tool_name": name,
-    #         "content": result
-    #     })
-    
-    # final_res = client.chat(model=MODEL, messages=messages, stream=False, think=False)
-    # print(f"\n [最终回答]: {final_res['message']['content']}")
-    # print(f"\n 此刻上下文共 {len(messages)} 条消息：")
-    # print(f"返回的 final_res： \n {final_res.model_dump_json(indent=2, exclude_unset=True)} \n")
-    # messages.append({
-    #     "role": "assistant",
-    #     "content": final_res['message']['content']
-    # })
-    # print(f'messages： \n {json.dumps(messages, indent=2, ensure_ascii=False, default=lambda o: o.model_dump())}')
-    # for index,item in enumerate(messages, 1):
-    #     print(f"[消息 {index}] {item['role']:9s}: {item['content']}")
 
 if __name__ == "__main__":
     main()
