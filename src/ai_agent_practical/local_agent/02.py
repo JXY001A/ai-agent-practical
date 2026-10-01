@@ -62,7 +62,7 @@ TOOLS = [
             "name": "get_current_temperature",
             "description": (
                 "查询某个城市的实时气温（摄氏度）。数据来自Open-Meteo，免费且不需要 API Key。"
-                "注意：city 必须是英文或拼音地名（如 tokyo、Shanghai）,不支持中文名"
+                "注意：city 必须是英文或拼音地名（如 tokyo、Shanghai）"
             ),
             "parameters": {
                 "type": "object",
