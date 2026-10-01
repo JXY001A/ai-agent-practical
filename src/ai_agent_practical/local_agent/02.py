@@ -143,7 +143,10 @@ def main()->None:
     print(f"\n [最终回答]: {final_res['message']['content']}")
     print(f"\n 此刻上下文共 {len(messages)} 条消息：")
     print(f"返回的 final_res： \n {final_res.model_dump_json(indent=2, exclude_unset=True)} \n")
-
+    messages.append({
+        "role": "assistant",
+        "content": final_res['message']['content']
+    })
     print(f'messages： \n {json.dumps(messages, indent=2, ensure_ascii=False, default=lambda o: o.model_dump())}')
     # for index,item in enumerate(messages, 1):
     #     print(f"[消息 {index}] {item['role']:9s}: {item['content']}")
