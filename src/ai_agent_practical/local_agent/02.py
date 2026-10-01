@@ -4,7 +4,6 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 import requests
 
-from ai_agent_practical.local_agent.step4_react import MAX_STEPS
 
 
 MODEL = "qwen3:0.6b"
