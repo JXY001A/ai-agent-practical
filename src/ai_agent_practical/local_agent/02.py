@@ -3,6 +3,7 @@ import ollama
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import requests
+import time
 # 模块解释：
 from  concurrent.futures import ThreadPoolExecutor
 
@@ -129,18 +130,27 @@ def run_tools(calls: list) -> tuple[str, str]:
 
 def main()->None:
     client = ollama.Client()
-    messages:list[dict] = [{"role": "user", "content": "上海现在几点？气温多少？"}]
+    messages:list[dict] = [
+        {"role":"system","content":"您是一个简洁的助手，回答不大于过两句话。"},
+        {"role": "user", "content": "上海现在几点？气温多少？"}
+    ]
     for step in range(1,MAX_STEPS+1):
         text_parts:list[str] = []
         pending:list = []
         print(f"\n ---- 第 {step} 轮：ReAct 上下文已累计 {len(messages)} 条消息 ----")
+        t0 = time.perf_counter()  # 计时起点：本轮 chat 调用发起之前
+        first_chunk = True        # 还没收到任何响应 chunk
         for chunk in client.chat(
             model=MODEL,
             messages=messages,
             tools=TOOLS,
             stream=True,
             think = True,
-        ):
+        ):  
+            if first_chunk:
+                # 第一个 chunk 到达即“首次响应”，与 t0 的差值就是首响应耗时（TTFT）
+                first_chunk = False
+                print(f"[首响应] 第 {step} 轮首 chunk 用时 {time.perf_counter() - t0:.3f} s")
             message = chunk.get("message",{})
             if message.get("thinking"):
                 
