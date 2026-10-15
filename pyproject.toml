@@ -12,6 +12,7 @@ dependencies = [
     # Open-Meteo。骨架刻意不引入 torch / vllm —— macOS 无 CUDA，用不上。
     "ollama>=0.5.1",
     "requests>=2.31.0",
+    "tiktoken>=0.14.0",
 ]
 
 [project.scripts]
