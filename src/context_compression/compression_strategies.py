@@ -335,7 +335,7 @@ class ContextCompressor:
             all_content.append(f"""
                 ======= Page: {result.get("title", "N/A")} =======
                 URL: {result.get("URL", "N/A")}
-                Content: {original_content[:5000]}
+                Content: {original_content[:max_char_per_page]}
             """)
         combined_content = "\n\n".join(all_content)
 
