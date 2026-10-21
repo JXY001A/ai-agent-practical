@@ -61,6 +61,16 @@ class BaseMemoryManager(ABC):
         self.MAX_MEMORY_ITEMS = 100
         self.load_memory()
 
+    def _existing_file_type(self):
+        """读取现有记忆文件的 type 字段，用于防止不同模式互相覆盖"""
+        if not os.path.exists(self.memory_file):
+            return None
+        try:
+            with open(self.memory_file, "r", encoding="utf-8") as f:
+                return json.load(f).get("type")
+        except Exception:
+            return None
+
     @abstractmethod
     def load_memory(self):
         pass
@@ -102,7 +112,14 @@ class NoteMemoryManager(BaseMemoryManager):
             try:
                 with open(self.memory_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                    self.notes = [MemoryNote.from_dict(note) for note in data["notes"]]
+                    file_type = data.get("type")
+                    if file_type and file_type != "notes":
+                        logger.warning(
+                            f"记忆文件格式为 {file_type}，与 NOTES 模式不匹配，已跳过加载：{self.memory_file}"
+                        )
+                        self.notes = []
+                    else:
+                        self.notes = [MemoryNote.from_dict(note) for note in data.get("notes", [])]
                 logger.info(f"Loaded {len(self.notes)} notes for user {self.user_id}")
             except Exception as e:
                 logger.error(f"Error loading memory: {e}")
@@ -113,6 +130,12 @@ class NoteMemoryManager(BaseMemoryManager):
 
     def save_memory(self):
         try:
+            file_type = self._existing_file_type()
+            if file_type and file_type != "notes":
+                logger.error(
+                    f"拒绝写入：{self.memory_file} 当前为 {file_type} 格式，与 NOTES 模式不匹配"
+                )
+                return
             # 临时文件的意义
             # 为了让写入过程原子化，避免写崩时把唯一的持久化文件写坏
             #json.dump 是流式写入，先截断原文件再逐块写。若中途进程崩溃/断电，原文件已被清空或只剩半截 JSON——旧数据没了，新数据也不完整，下次 load_memory 直接解析失败。
@@ -227,7 +250,14 @@ class JSONCardMemoryManager(BaseMemoryManager):
             try:
                 with open(self.memory_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                    self.memory_cards = data.get('memory_cards', {})
+                    file_type = data.get("type")
+                    if file_type and file_type != "json_cards":
+                        logger.warning(
+                            f"记忆文件格式为 {file_type}，与 JSON_CARD 模式不匹配，已跳过加载：{self.memory_file}"
+                        )
+                        self.memory_cards = {}
+                    else:
+                        self.memory_cards = data.get('memory_cards', {})
                 logger.info(f"Loaded memory cards for user {self.user_id}")
             except Exception as e:
                 logger.error(f"Error loading memory: {e}")
@@ -238,6 +268,12 @@ class JSONCardMemoryManager(BaseMemoryManager):
     
     def save_memory(self):
         try:
+            file_type = self._existing_file_type()
+            if file_type and file_type != "json_cards":
+                logger.error(
+                    f"拒绝写入：{self.memory_file} 当前为 {file_type} 格式，与 JSON_CARD 模式不匹配"
+                )
+                return
             os.makedirs(self.memory_file.parent, exist_ok=True)
             tmp_file = self.memory_file.with_name(self.memory_file.name + ".tmp")  # 临时文件
             data = {
@@ -556,7 +592,32 @@ class AdvancedJSONMemoryManager(BaseMemoryManager):
         
         return results
 
-def create_memory_manager(user_id: str, mode: MemoryMode = None) -> BaseMemoryManager:
+class NoMemoryManager(BaseMemoryManager):
+    """NONE 模式：不保存、不读取任何记忆，所有接口为空实现"""
+
+    def load_memory(self):
+        self.memories = []
+
+    def save_memory(self):
+        return None
+
+    def add_memory(self, content: any, session_id: str, **kwargs):
+        return None
+
+    def delete_memory(self, memory_id: str):
+        return False
+
+    def update_memory(self, memory_id: str, content: any):
+        return False
+
+    def search_memories(self, query: str, session_id: str = "", **kwargs):
+        return []
+
+    def get_context_string(self) -> str:
+        return ""
+
+
+def create_memory_manager(user_id: str, mode: MemoryMode | None = None) -> BaseMemoryManager:
     """
     Factory function to create appropriate memory manager
     
@@ -569,7 +630,10 @@ def create_memory_manager(user_id: str, mode: MemoryMode = None) -> BaseMemoryMa
     """
     mode = mode or MemoryMode(Config.MEMORY_MODE)
     
-    if mode == MemoryMode.NOTES or mode == MemoryMode.ENHANCED_NOTES:
+    if mode == MemoryMode.NONE:
+        # 无记忆模式：返回空实现，调用方无需额外判断
+        return NoMemoryManager(user_id)
+    elif mode == MemoryMode.NOTES or mode == MemoryMode.ENHANCED_NOTES:
         # Both basic and enhanced notes use the same manager
         # The difference is in the prompts used by the agent
         return NoteMemoryManager(user_id)

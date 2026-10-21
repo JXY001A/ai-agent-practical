@@ -12,6 +12,7 @@ load_dotenv(Path(__file__).parent.parent / ".env")
 
 class MemoryMode(Enum):
     """记忆管理模式"""
+    NONE = "none"
     NOTES = "notes"
     ENHANCED_NOTES = "enhanced_notes"
     JSON_CARD = "json_card"

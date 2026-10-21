@@ -1,0 +1,100 @@
+{
+    "user_id": "jxy001c",
+    "type": "json_cards",
+    "update_at": "2026-10-21 11:09:59",
+    "memory_cards": {
+        "identity": {
+            "work": {
+                "830cc082-0669-41c1-996e-8c0c2c808e8e": {
+                    "value": "Name is Alex; works as a software developer focused on Python and machine learning.",
+                    "source": "session-f42fb2ba",
+                    "updated_at": "2026-10-21T10:44:11.374876"
+                }
+            }
+        },
+        "preferences": {
+            "skills": {
+                "2017e658-2298-4c17-87f6-2f63067b3e2e": {
+                    "value": "Loves Python and machine learning; Python is the primary programming language and preferred ML tooling is Python-centric.",
+                    "source": "session-f42fb2ba",
+                    "updated_at": "2026-10-21T10:44:11.376602"
+                }
+            },
+            "tooling": {
+                "1e855279-bc14-4c9e-9d2c-a404a6e5326f": {
+                    "value": "Prefers dark themes in their IDE.",
+                    "source": "session-5261b3e0",
+                    "updated_at": 1792415226
+                }
+            },
+            "code-style": {
+                "2f9fab95-8836-44d2-9cd5-d054003e1dbd": {
+                    "value": "Always uses type hints in Python code; wants code examples written with type annotations.",
+                    "source": "session-5261b3e0",
+                    "updated_at": 1792415226
+                }
+            }
+        },
+        "tools": {
+            "frameworks": {
+                "4b6ace95-d37c-4bc5-b74b-bef3fcd797a2": {
+                    "value": "JAX is his active framework (switched from PyTorch for performance; PyTorch is now legacy/comparison-only). Prefers JAX-first tooling: Flax/NNX or Equinox, Optax, Orbax, Grain, jax.sharding, and functional idioms (jit, vmap, explicit PRNG keys). No longer needs a \"which framework?\" check-in.",
+                    "source": "session-0054d8da",
+                    "updated_at": "2026-10-21T11:09:36.510141"
+                }
+            }
+        },
+        "projects": {
+            "recsys": {
+                "b3b99c31-8420-4108-8ef0-799f82d9681f": {
+                    "value": "Building a recommendation system in JAX (framework now settled; earlier \"using PyTorch\" statements are superseded). Interests: two-tower retrieval, ranking models (DLRM/DeepFM/SASRec-style), negative sampling, large sparse embedding tables, and Recall@K / NDCG@K on temporal splits, plus stack/tooling selection. Known JAX pain points he should plan for: sparse/sharded embedding tables (no torchrec equivalent), recompilation from changing shapes, and real-time serving from JAX.",
+                    "source": "session-0054d8da",
+                    "updated_at": "2026-10-21T11:09:36.511314"
+                },
+                "stage_and_scope": {
+                    "value": "Recsys project appears to be at an early/exploratory stage: he is still choosing frameworks and tooling rather than debugging specific code. Recurring topics: two-tower retrieval, ranking models (DLRM/DeepFM/SASRec-style), negative sampling, large sparse embedding tables, and evaluation with Recall@K / NDCG@K on temporal splits. Has never shared code, dataset scale, or a specific blocker — invite him to paste model/training-loop code.",
+                    "source": "session-0054d8da",
+                    "updated_at": "2026-10-21 11:09:07"
+                },
+                "jax_stack_already_proposed": {
+                    "value": "Default JAX recsys stack already recommended to Alex (avoid re-listing it from scratch; extend or refine instead): Flax NNX (or Equinox) for two-tower + ranker; jaxtyping + beartype with mypy for typed shapes (decorators only on debug/eval paths); optax adamw + clip_by_global_norm + warmup_cosine_decay_schedule, nnx.Optimizer (two-tower = two optimizers or explicit param partitioning); orbax-checkpoint with async saves; Grain MapDataset/RandomAccessDataSource for sampling; in-batch negatives + jax.random.fold_in(key, step) + logQ correction, hard negatives via offline FAISS index refresh; jax.sharding PartitionSpec on the embedding table axis with shard_map all-to-all (no torchrec equivalent — start with plain jnp.take baseline); FAISS HNSW/IVF-PQ or ScaNN for ANN; batch-precompute item vectors and serve only the user tower (jax2tf/ONNX + Triton if real-time needed); self-written typed recall_at_k/ndcg_at_k via jax.vmap on strict temporal splits; W&B tracking; ml_collections ConfigDict or dataclass for config. Three flagged risks: sparse embeddings, recompilation (fixed buckets 128/256/512 + padding), and weak native serving.",
+                    "source": "session-0054d8da",
+                    "updated_at": "2026-10-21 11:09:59"
+                }
+            }
+        },
+        "frameworks": {
+            "jax": {
+                "9c40febb-949f-457b-b026-5d9a2ab6ff32": {
+                    "value": "RESOLVED (latest session): Alex confirmed \"actually, I recently switched from PyTorch to JAX for better performance\" and the assistant explicitly treated JAX as the active framework, with earlier \"my recsys project uses PyTorch\" mentions as superseded. Stop hedging or offering dual PyTorch/JAX answers — default to JAX-idiomatic, typed code unless he asks for a PyTorch comparison. In response, Alex was asked one narrow question: Flax NNX vs Equinox. He has not answered, so that choice (and GPU vs TPU, dataset scale, batch vs real-time serving) is still open — ask about one of them at a time, not all four.",
+                    "source": "session-0054d8da",
+                    "updated_at": "2026-10-21T11:09:36.507925"
+                }
+            }
+        },
+        "communication": {
+            "preferences": {
+                "dab14b30-cfbd-4f03-ba2d-36e025a52ff4": {
+                    "value": "Frequently asks \"What do you remember about my work and preferences?\" — values explicit recall of his stored profile; proactively summarize what's remembered and confirm/refresh details when relevant.",
+                    "source": "session-f42fb2ba",
+                    "updated_at": 1792550675
+                },
+                "answer_format": {
+                    "value": "Repeatedly asks for tool/stack recommendations for his recsys project; best served by layered stack tables (modeling / training / data+negative sampling / embedding tables / retrieval / serving / tracking) with an explicit \"caveat\" column or paragraph, especially flagging where JAX is weaker than PyTorch (sparse embeddings, recsys tooling maturity, serving). He rarely volunteers scale, hardware (GPU vs TPU), latency SLO, or batch vs real-time — so provide a concrete JAX-first default stack AND ask only ONE narrow follow-up question.",
+                    "source": "session-0054d8da",
+                    "updated_at": "2026-10-21T11:09:38.332619"
+                },
+                "language_pattern": {
+                    "value": "Switches languages by task type: writes memory/meta requests and \"what do you know about me\" questions in Chinese (e.g. 「告诉我你知道的有关于我的信息」「分析最近的对话并更新我的记忆」), but states technical facts, preferences, and project details in English. When reciting his stored profile, Chinese headers/section summaries with English technical terms (JAX, Optax, two-tower, Recall@K) land well.",
+                    "source": "session-0054d8da",
+                    "updated_at": "2026-10-21 11:09:22"
+                },
+                "profile_recap_style": {
+                    "value": "Best-received profile recaps are structured with clearly labeled sections (identity, tech preferences, framework status, project, communication style), an explicit ⚠️ callout for the unresolved PyTorch-vs-JAX contradiction, and 1–2 concrete yes/no questions at the end to resolve it. He has never actually answered those questions, so re-ask narrowly (one question at a time) rather than a numbered list of four.",
+                    "source": "session-0054d8da",
+                    "updated_at": "2026-10-21 11:09:22"
+                }
+            }
+        }
+    }
+}

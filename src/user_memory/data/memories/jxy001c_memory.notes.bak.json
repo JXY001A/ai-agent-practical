@@ -1,0 +1,104 @@
+{
+    "user_id": "jxy001c",
+    "type": "notes",
+    "update_at": "2026-10-21 10:44:35",
+    "notes": [
+        {
+            "note_id": "830cc082-0669-41c1-996e-8c0c2c808e8e",
+            "content": "Name is Alex; works as a software developer focused on Python and machine learning.",
+            "session_id": "session-f42fb2ba",
+            "created_at": 1792415226,
+            "updated_at": "2026-10-21T10:44:11.374876",
+            "tags": [
+                "identity",
+                "work"
+            ]
+        },
+        {
+            "note_id": "2017e658-2298-4c17-87f6-2f63067b3e2e",
+            "content": "Loves Python and machine learning; Python is the primary programming language and preferred ML tooling is Python-centric.",
+            "session_id": "session-f42fb2ba",
+            "created_at": 1792415226,
+            "updated_at": "2026-10-21T10:44:11.376602",
+            "tags": [
+                "preferences",
+                "skills",
+                "python"
+            ]
+        },
+        {
+            "note_id": "4b6ace95-d37c-4bc5-b74b-bef3fcd797a2",
+            "content": "Says he switched from PyTorch to JAX for better performance and prefers JAX-first tooling (Flax/NNX or Equinox, Optax, Orbax, Grain, jax.sharding) and functional JAX idioms (jit, vmap, explicit PRNG keys). Note: he has also said his current recsys project uses PyTorch, so clarify which framework is active before framework-specific advice.",
+            "session_id": "session-f42fb2ba",
+            "created_at": 1792415226,
+            "updated_at": "2026-10-21T10:44:22.695693",
+            "tags": [
+                "tools",
+                "frameworks",
+                "jax",
+                "preferences"
+            ]
+        },
+        {
+            "note_id": "b3b99c31-8420-4108-8ef0-799f82d9681f",
+            "content": "Is building a recommendation system project; interested in two-tower retrieval, ranking models, negative sampling, and ranking evaluation metrics (Recall@K, NDCG@K), plus tooling/stack recommendations. Framework for this project is inconsistent across sessions (see framework note).",
+            "session_id": "session-f42fb2ba",
+            "created_at": 1792415226,
+            "updated_at": "2026-10-21T10:44:21.061807",
+            "tags": [
+                "projects",
+                "recsys",
+                "ml"
+            ]
+        },
+        {
+            "note_id": "1e855279-bc14-4c9e-9d2c-a404a6e5326f",
+            "content": "Prefers dark themes in their IDE.",
+            "session_id": "session-5261b3e0",
+            "created_at": 1792415226,
+            "updated_at": 1792415226,
+            "tags": [
+                "preferences",
+                "tooling"
+            ]
+        },
+        {
+            "note_id": "2f9fab95-8836-44d2-9cd5-d054003e1dbd",
+            "content": "Always uses type hints in Python code; wants code examples written with type annotations.",
+            "session_id": "session-5261b3e0",
+            "created_at": 1792415226,
+            "updated_at": 1792415226,
+            "tags": [
+                "preferences",
+                "code-style",
+                "python"
+            ]
+        },
+        {
+            "note_id": "9c40febb-949f-457b-b026-5d9a2ab6ff32",
+            "content": "Framework ambiguity (still unresolved): Alex said he switched from PyTorch to JAX for performance, yet in multiple sessions — including the two most recent ones — he described his recommendation system project as \"using PyTorch.\" Treat the project as PyTorch-based unless he says otherwise, while acknowledging his stated JAX/performance interest; ask which framework is active before framework-specific advice and be ready to give both PyTorch and JAX-idiomatic versions.",
+            "session_id": "session-f42fb2ba",
+            "created_at": 1792550661,
+            "updated_at": "2026-10-21T10:44:29.954622",
+            "tags": [
+                "frameworks",
+                "jax",
+                "pytorch",
+                "needs-clarification",
+                "recsys"
+            ]
+        },
+        {
+            "note_id": "dab14b30-cfbd-4f03-ba2d-36e025a52ff4",
+            "content": "Frequently asks \"What do you remember about my work and preferences?\" — values explicit recall of his stored profile; proactively summarize what's remembered and confirm/refresh details when relevant.",
+            "session_id": "session-f42fb2ba",
+            "created_at": 1792550675,
+            "updated_at": 1792550675,
+            "tags": [
+                "communication",
+                "preferences",
+                "memory"
+            ]
+        }
+    ]
+}
